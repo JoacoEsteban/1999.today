@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { T, useLoader } from '@threlte/core'
+  import { T, useLoader, useTask } from '@threlte/core'
   import {
     BoxGeometry,
+    Clock,
     Color,
     MeshStandardMaterial,
     RepeatWrapping,
@@ -11,6 +12,8 @@
   } from 'three'
   import Bushes from './Bushes.svelte'
   import Graves from './Graves.svelte'
+  import { BehaviorSubject, interval, map, pipe } from 'rxjs'
+  import { trig } from '$lib/math'
 
   const size = 4
   const height = size * 0.625
@@ -83,6 +86,20 @@
     //   // tx.repeat.set(1, 1)
     // })
   })
+
+  const doorLightIntensity = new BehaviorSubject(5)
+
+  const clock = new Clock(true)
+  useTask(() => {
+    const elapsed = clock.getElapsedTime()
+    const speed = 3
+    const factor =
+      trig.sin(elapsed * speed) *
+      trig.sin(elapsed * speed * 0.36) *
+      trig.sin(elapsed * speed * 10)
+    const max = 2
+    doorLightIntensity.next(0.1 + factor * max)
+  })
 </script>
 
 <T.Group>
@@ -148,7 +165,7 @@
   <Bushes />
   <T.PointLight
     color="#ff7d46"
-    intensity="5"
+    intensity={$doorLightIntensity}
     position={[0, doorSize, size / 2 + 0.1]}
   />
 </T.Group>
