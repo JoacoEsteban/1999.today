@@ -19,7 +19,6 @@
     Points,
     PointsMaterial,
   } from 'three'
-  import { lerp } from 'three/src/math/MathUtils.js'
 
   const { scene } = useThrelte()
   const particlesAmount$ = new BehaviorSubject(100000)
@@ -31,6 +30,7 @@
   const randomnessPower$ = new BehaviorSubject(3)
   const outsideColor$ = new BehaviorSubject('#1b3984')
   const insideColor$ = new BehaviorSubject('#ff6030')
+  const centerOffset$ = new BehaviorSubject(0)
   particlesAmount$.set = particlesAmount$.next.bind(particlesAmount$)
   particlesSize$.set = particlesSize$.next.bind(particlesSize$)
   radius$.set = radius$.next.bind(radius$)
@@ -40,6 +40,7 @@
   randomnessPower$.set = randomnessPower$.next.bind(randomnessPower$)
   outsideColor$.set = outsideColor$.next.bind(outsideColor$)
   insideColor$.set = insideColor$.next.bind(insideColor$)
+  centerOffset$.set = centerOffset$.next.bind(centerOffset$)
 
   function getPoints(
     amount: number,
@@ -51,6 +52,7 @@
     randomnessPower: number,
     outsideColor: string,
     insideColor: string,
+    centerOffset: number,
   ) {
     const iterations = amount * 3
     const geometry = new BufferGeometry()
@@ -58,7 +60,7 @@
     const colors = new Float32Array(iterations)
     for (const i of repeat(amount)) {
       const i3 = i * 3
-      const length = radius * Math.random()
+      const length = radius * Math.random() + centerOffset
       const angle = ((i % branches) / branches) * Math.PI * 2 + length * spin
 
       const offset = () =>
@@ -70,7 +72,7 @@
 
       const color = new Color(insideColor).lerp(
         new Color(outsideColor),
-        length / radius,
+        length / Math.abs(radius + centerOffset),
       )
 
       colors[i3] = color.r
@@ -105,6 +107,7 @@
     randomnessPower$,
     outsideColor$,
     insideColor$,
+    centerOffset$,
   ]).pipe(
     debounceTime(100),
     map((args) => {
@@ -123,7 +126,6 @@
       }),
     )
     .subscribe()
-  lerp
 </script>
 
 <T.PerspectiveCamera makeDefault position={[10, 0, 0]}>
@@ -167,4 +169,11 @@
   />
   <ColorPicker label="Inside Color" bind:value={$insideColor$} />
   <ColorPicker label="Outside Color" bind:value={$outsideColor$} />
+  <Slider
+    label="Center Offset"
+    bind:value={$centerOffset$}
+    min={-10}
+    max={10}
+    step={0.01}
+  />
 </Pane>
