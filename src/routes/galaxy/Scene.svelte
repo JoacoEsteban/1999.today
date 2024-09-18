@@ -3,7 +3,13 @@
   import { repeat } from '$lib/util/repeat'
   import { T, useTask, useThrelte } from '@threlte/core'
   import { OrbitControls } from '@threlte/extras'
-  import { BehaviorSubject, combineLatest, map, pairwise, Subject } from 'rxjs'
+  import {
+    BehaviorSubject,
+    combineLatest,
+    debounceTime,
+    map,
+    pairwise,
+  } from 'rxjs'
   import { Pane, Slider, Color as ColorPicker } from 'svelte-tweakpane-ui'
   import {
     AdditiveBlending,
@@ -100,6 +106,7 @@
     outsideColor$,
     insideColor$,
   ]).pipe(
+    debounceTime(100),
     map((args) => {
       return getPoints(...args)
     }),
@@ -123,8 +130,9 @@
   <OrbitControls enableDamping />
 </T.PerspectiveCamera>
 
-<T is={$points$} />
-
+{#if $points$}
+  <T is={$points$} />
+{/if}
 <Pane title="Galaxy" position="fixed">
   <Slider
     label="Points"
