@@ -134,10 +134,10 @@
     step={1}
   />
   <Slider
-    label="Sizee"
+    label="Size"
     bind:value={$particlesSize$}
     min={0.0001}
-    max={1}
+    max={0.1}
     step={0.001}
   />
   <Slider label="Radius" bind:value={$radius$} min={1} max={10} step={1} />
